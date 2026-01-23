@@ -55,13 +55,12 @@ fn char_count(file: &str) -> usize {
         .lines()
         .map(String::from)
         .collect();
-    let chars: Vec<char> = contents.iter().flat_map(|s| s.chars()).collect();
-    return chars.len();
+    let white_space = contents.len();
+    let chars: Vec<char> = contents.iter().flat_map(|c| c.chars()).collect();
+    return chars.len() + contents.len();
 }
 
 fn byte_count(file: &str) -> usize {
-
-
     let contents: Vec<String> = fs::read_to_string(file)
         .unwrap()
         .lines()
@@ -75,7 +74,42 @@ fn byte_count(file: &str) -> usize {
     }
     count += contents.len();
 
-    return count
+    return count;
+}
+
+fn max_line_count(file: &str) -> usize {
+    let contents: Vec<String> = fs::read_to_string(file)
+        .unwrap()
+        .lines()
+        .map(String::from)
+        .collect();
+
+    let mut largest = 0;
+
+    for content in contents.iter() {
+        let line_len = content.len();
+        if line_len > largest {
+            largest = line_len;
+        }
+    }
+    return largest;
+}
+
+fn blank_input(file: &str) {
+    let mut bytes = byte_count(file);
+    let mut lines = line_count(file);
+    let mut words = word_count(file);
+
+    println!("{} {} {}", lines, words, bytes);
+}
+
+fn no_file() -> String {
+    let mut input = String::new();
+    io::stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line");
+
+    return input;
 }
 
 fn main() {
@@ -90,8 +124,16 @@ fn main() {
 
             Some(_) => file.push(&args[i]),
 
-            None => println!("lala"),
+            _ => (),
         }
+    }
+
+    if file.len() == 0 {
+        let mut input = String::new();
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
+        file.push(input);
     }
 
     let mut base_opts: Vec<String> = options
@@ -123,7 +165,6 @@ fn main() {
     let mut words = String::new();
     let mut max_len = String::new();
 
-
     if base_opts.len() == 0 {
         println!(
             " {:?} {:?} {:?}",
@@ -135,17 +176,22 @@ fn main() {
     } else {
         for opt in base_opts.iter() {
             match opt.as_str() {
-                "c" | "bytes" => let mut bytes = String::from(" ") + &byte_count(file[0]).to_string(),
-                "m" | "chars" => let mut chars = String::from(" ") + &char_count(file[0]).to_string(),
-                "l" | "lines" => let mut lines = String::from(" ") + &line_count(file[0]).to_string(),
-                "L" | "maxlinelength" => println!("max len"),
-                "w" | "words" => let mut words = String::from(" ") + &word_count(file[0]).to_string(),
+                "c" | "bytes" => bytes = String::from(" ") + &byte_count(file[0]).to_string(),
+                "m" | "chars" => chars = String::from(" ") + &char_count(file[0]).to_string(),
+                "l" | "lines" => lines = String::from(" ") + &line_count(file[0]).to_string(),
+                "L" | "maxlinelength" => {
+                    max_len = String::from(" ") + &max_line_count(file[0]).to_string()
+                }
+                "w" | "words" => words = String::from(" ") + &word_count(file[0]).to_string(),
                 "help" => println!("help"),
                 "version" => println!("ver"),
-                _ => println!("lala"),
+                _ => {
+                    blank_input(file[0]);
+                    return;
+                }
             }
         }
 
-        println!("{}{}{}{}", lines, words, bytes, chars);
+        println!("{}{}{}{}{}", lines, words, bytes, chars, max_len);
     }
 }
