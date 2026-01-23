@@ -18,6 +18,28 @@ const ARGUMENTS: [&str; 12] = [
     "-w",
 ];
 
+const HELP: &str = "Usage: wc [OPTION]... [FILE]...
+Print newline, word, and byte counts for each FILE, and a total line if
+more than one FILE is specified.  A word is a non-zero-length sequence of
+characters delimited by white space.
+
+With no FILE, or when FILE is -, read standard input.
+
+The options below may be used to select which counts are printed, always in
+the following order: newline, word, character, byte, maximum line length.
+  -c, --bytes            print the byte counts
+  -m, --chars            print the character counts
+  -l, --lines            print the newline counts
+  -L, --max-line-length  print the maximum display width
+  -w, --words            print the word counts
+      --help     display this help and exit
+      --version  output version information and exit
+
+GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
+Report any translation bugs to <https://translationproject.org/team/>
+Full documentation <https://www.gnu.org/software/coreutils/wc>
+or available locally via: info '(coreutils) wc invocation'";
+
 const CHAR_ARGUMENTS: [char; 5] = ['c', 'm', 'l', 'L', 'w'];
 
 fn read_file(file: &str) -> std::io::Result<()> {
@@ -184,8 +206,8 @@ fn main() {
                     max_len = String::from(" ") + &max_line_count(file[0]).to_string()
                 }
                 "w" | "words" => words = String::from(" ") + &word_count(file[0]).to_string(),
-                "help" => println!("help"),
-                "version" => println!("ver"),
+                "help" => println!("{:?}", HELP),
+                "version" => println!("Binkle_wc (GNU coreutils) 1.0"),
                 _ => {
                     blank_input(file[0]);
                     return;
