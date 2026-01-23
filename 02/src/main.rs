@@ -127,7 +127,7 @@ fn main() {
             _ => (),
         }
     }
-
+/*
     if file.len() == 0 {
         let mut input = String::new();
         io::stdin()
@@ -135,6 +135,7 @@ fn main() {
             .expect("Failed to read line");
         file.push(input);
     }
+*/
 
     let mut base_opts: Vec<String> = options
         .clone()
@@ -195,3 +196,4 @@ fn main() {
         println!("{}{}{}{}{}", lines, words, bytes, chars, max_len);
     }
 }
+
