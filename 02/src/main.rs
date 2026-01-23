@@ -138,26 +138,27 @@ fn main() {
     let args: Vec<String> = env::args().collect();
 
     let mut options: Vec<&str> = Vec::new();
-    let mut file: Vec<&str> = Vec::new();
+    let mut file: Vec<String> = Vec::new();
 
     for i in 1..args.len() {
         match args[i].chars().next() {
             Some('-') => options.push(&args[i]),
 
-            Some(_) => file.push(&args[i]),
+            Some(_) => file.push(args[i].clone()),
 
             _ => (),
+
         }
     }
-/*
+
     if file.len() == 0 {
         let mut input = String::new();
         io::stdin()
             .read_line(&mut input)
             .expect("Failed to read line");
-        file.push(input);
+        file.push(input.trim().to_string());
     }
-*/
+
 
     let mut base_opts: Vec<String> = options
         .clone()
@@ -191,25 +192,25 @@ fn main() {
     if base_opts.len() == 0 {
         println!(
             " {:?} {:?} {:?}",
-            line_count(file[0]),
-            word_count(file[0]),
-            byte_count(file[0])
+            line_count(&file[0]),
+            word_count(&file[0]),
+            byte_count(&file[0])
         );
         return;
     } else {
         for opt in base_opts.iter() {
             match opt.as_str() {
-                "c" | "bytes" => bytes = String::from(" ") + &byte_count(file[0]).to_string(),
-                "m" | "chars" => chars = String::from(" ") + &char_count(file[0]).to_string(),
-                "l" | "lines" => lines = String::from(" ") + &line_count(file[0]).to_string(),
+                "c" | "bytes" => bytes = String::from(" ") + &byte_count(&file[0]).to_string(),
+                "m" | "chars" => chars = String::from(" ") + &char_count(&file[0]).to_string(),
+                "l" | "lines" => lines = String::from(" ") + &line_count(&file[0]).to_string(),
                 "L" | "maxlinelength" => {
-                    max_len = String::from(" ") + &max_line_count(file[0]).to_string()
+                    max_len = String::from(" ") + &max_line_count(&file[0]).to_string()
                 }
-                "w" | "words" => words = String::from(" ") + &word_count(file[0]).to_string(),
+                "w" | "words" => words = String::from(" ") + &word_count(&file[0]).to_string(),
                 "help" => println!("{:?}", HELP),
                 "version" => println!("Binkle_wc (GNU coreutils) 1.0"),
                 _ => {
-                    blank_input(file[0]);
+                    blank_input(&file[0]);
                     return;
                 }
             }
