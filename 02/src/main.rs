@@ -18,27 +18,24 @@ const ARGUMENTS: [&str; 12] = [
     "-w",
 ];
 
-const HELP: &str = "Usage: wc [OPTION]... [FILE]...
+const HELP: &str = "Usage: binkle_wc [OPTION]... [FILE]...
 Print newline, word, and byte counts for each FILE, and a total line if
 more than one FILE is specified.  A word is a non-zero-length sequence of
-characters delimited by white space.
+characters delimited by white space.\n
 
-With no FILE, or when FILE is -, read standard input.
+With no FILE, or when FILE is -, read standard input.\n
 
 The options below may be used to select which counts are printed, always in
-the following order: newline, word, character, byte, maximum line length.
-  -c, --bytes            print the byte counts
-  -m, --chars            print the character counts
-  -l, --lines            print the newline counts
-  -L, --max-line-length  print the maximum display width
-  -w, --words            print the word counts
-      --help     display this help and exit
-      --version  output version information and exit
+the following order: newline, word, character, byte, maximum line length.\n
+  -c, --bytes            print the byte counts\n
+  -m, --chars            print the character counts\n
+  -l, --lines            print the newline counts\n
+  -L, --max-line-length  print the maximum display width\n
+  -w, --words            print the word counts\n
+      --help     display this help and exit\n
+      --version  output version information and exit\n
 
-GNU coreutils online help: <https://www.gnu.org/software/coreutils/>
-Report any translation bugs to <https://translationproject.org/team/>
-Full documentation <https://www.gnu.org/software/coreutils/wc>
-or available locally via: info '(coreutils) wc invocation'";
+Binkle cannot help you if you have any problems";
 
 const CHAR_ARGUMENTS: [char; 5] = ['c', 'm', 'l', 'L', 'w'];
 
@@ -191,10 +188,11 @@ fn main() {
 
     if base_opts.len() == 0 {
         println!(
-            " {:?} {:?} {:?}",
+            " {:?} {:?} {:?} {:?}",
             line_count(&file[0]),
             word_count(&file[0]),
-            byte_count(&file[0])
+            byte_count(&file[0]),
+            file[0]
         );
         return;
     } else {
@@ -207,8 +205,8 @@ fn main() {
                     max_len = String::from(" ") + &max_line_count(&file[0]).to_string()
                 }
                 "w" | "words" => words = String::from(" ") + &word_count(&file[0]).to_string(),
-                "help" => println!("{:?}", HELP),
-                "version" => println!("Binkle_wc (GNU coreutils) 1.0"),
+                "help" => println!("{}",HELP),
+                "version" => println!("Binkle_wc Version 1.0!"),
                 _ => {
                     blank_input(&file[0]);
                     return;
@@ -216,7 +214,7 @@ fn main() {
             }
         }
 
-        println!("{}{}{}{}{}", lines, words, bytes, chars, max_len);
+        println!("{}{}{}{}{} {:?}", lines, words, bytes, chars, max_len,file[0]);
     }
 }
 
