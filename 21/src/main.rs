@@ -1,5 +1,6 @@
-use std::rc::Rc;
+/* My solution that I was trying
 fn main() {
+
 
     unsafe {
         //00000066, 00000105, 00000110, 00000107,00000108,00000101,
@@ -15,5 +16,14 @@ fn main() {
         //println!("{:?}", binkle_bytes);
         println!("{}", binkle);
     }
+}
+*/
 
+use std::slice;
+
+fn main() {
+    let chars: [i32; 3] = [0x6b6e6942, 0x7720656c, 0x6f646c72];
+    let str: &[u8] = unsafe { slice::from_raw_parts(chars.as_ptr().cast(), 11) };
+    let str = unsafe { str::from_utf8_unchecked(str) };
+    println!("{str}");
 }
