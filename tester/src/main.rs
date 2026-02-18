@@ -1,41 +1,29 @@
 fn main() {
+    const BRIGHT: u16 = 0x800;
+    const BLINK: u16 = 0x8000;
 
-    let s = 4;
+    const RNBW: [u16; 6] = [
+        0x0500 + BRIGHT,
+        0x0400,
+        0x0600 + BRIGHT,
+        0x0200,
+        0x0300,
+        0x0100,
+    ];
 
-    let mut  array: [u8; 0x80] = [0u8;0x80];
-
-    array[0] = 0xff;
-    array[1] = 0xff;
-
-    for row in 0..16 {
-        let mut count = s;
-        let byte = array[row];
-        println!("row {:?}", row);
-
-        for col in 0..8 {
-            println!("col {:?}", col);
-            if (byte & (1 << col)) == 0 {
-                count -= 1;
-            } else {
-                count = s;
-            }
-            println!("count {:?}", count);
-
-            if count == 0 {
-                let cur_bit = (8 * row) + col;
-                println!("cur_bit {:?}", cur_bit);
-
-                let first_bit = cur_bit - s + 1;
-                println!("first_bit {:?}", first_bit);
-
-                for bit in first_bit..(first_bit + s) {
-                    array[bit / 8] |= 1 << (bit % 8);
-                    println!("bit {:?}", bit);
-                    println!("array {:?}", array);
-                }
-
-                return
-            }
-        }
+    let binkle_string = b"Binkle World!";
+    let mut i = 0;
+    for b in binkle_string {
+        println!("{:?} {:?}", i, b);
+        i += 1;
     }
-} 
+
+    let vga_buffer: *mut u16 = unsafe { 0xb8000 as *mut u16 };
+
+    let mut i = 0;
+    for b in binkle_string {
+        println!("{:?}", i%6);
+        println!("{:x}", RNBW[i%6]);
+        i += 1
+    }
+}
