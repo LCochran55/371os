@@ -15,6 +15,6 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 
 #[unsafe(no_mangle)] // Doesnt mangle name of function
 pub extern "C" fn _start() -> ! {
-    colors::colors();
+    colors::image();
     loop {}
 }

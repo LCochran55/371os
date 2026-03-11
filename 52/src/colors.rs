@@ -1,3 +1,4 @@
+
 const BUFFER_HEIGHT: usize = 25;
 const BUFFER_WIDTH: usize = 80;
 const BG: u16 = 0x10;
@@ -44,6 +45,11 @@ pub fn colors() {
     }
 }
 
+mod img;
+use crate::println;
+
 pub fn image() {
+    let color_string = img::COLORS;
+    println!("{}", color_string);
 
 }
