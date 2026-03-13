@@ -48,27 +48,5 @@ fn panic(info: &core::panic::PanicInfo) -> ! {
 }
 
 
-/*
-#[test_case]
-fn test_println() {
-    println!("Binkle is the most epic cat boy");
-}
 
-#[test_case]
-fn test_wrapping_println() {
-    for _ in 0..534 {
-        print!("Binkle");
-    }
-}
-
-#[test_case]
-fn bad() {
-    assert!(false);
-}
-
-#[test_case]
-fn good() {
-    assert!(true);
-}
-*/
 
