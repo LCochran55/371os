@@ -14,9 +14,9 @@ pub extern "C" fn _start() -> ! {
 
     binkle_os::init();
 
-    unsafe {
-        *(0xdeadbeef as *mut u8) = 42;
-    };
+    //unsafe {
+      //  *(0xdeadbeef as *mut u8) = 42;
+    //};
 
     #[cfg(test)]
     test_main();

@@ -18,8 +18,8 @@ pub const QEMU_PASS: u32 = 0x10 as u32;
 pub const QEMU_FAIL: u32 = 0x11 as u32;
 
 pub fn init() {
-    gdt::init_gdt();
     interrupts::init_idt();
+    gdt::init_gdt();
 }
 
 pub fn exit_qemu(exit_code: u32) {
