@@ -1,25 +1,24 @@
 #![no_std]
 #![no_main]
-use spin::Lazy;
-use core::panic::PanicInfo;
 use binkle_os::serial_print;
+use core::panic::PanicInfo;
+use spin::Lazy;
 
 use lazy_static::lazy_static;
 use x86_64::structures::idt::InterruptDescriptorTable;
 
-use blog_os::{exit_qemu, QemuExitCode, serial_println};
+use blog_os::{QemuExitCode, exit_qemu, serial_println};
 use x86_64::structures::idt::InterruptStackFrame;
 
+static TEST_IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
+    let mut idt = InterruptDescriptorTable::new();
+    unsafe {
+        idt.double_fault
+            .set_handler_fn(test_double_fault_handler)
+            .set_stack_index(blog_os::gdt::DOUBLE_FAULT_IST_INDEX);
+    }
 
-static ref TEST_IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
-        let mut idt = InterruptDescriptorTable::new();
-        unsafe {
-            idt.double_fault
-                .set_handler_fn(test_double_fault_handler)
-                .set_stack_index(blog_os::gdt::DOUBLE_FAULT_IST_INDEX);
-        }
-
-        idt
+    idt
 });
 
 pub fn init_test_idt() {

@@ -6,12 +6,12 @@
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use x86_64::instructions::port::Port;
 use core::panic::PanicInfo;
+use x86_64::instructions::port::Port;
 
 pub mod gdt;
-pub mod serial;
 pub mod interrupts;
+pub mod serial;
 pub mod vga;
 
 pub const QEMU_PASS: u32 = 0x10 as u32;
@@ -64,7 +64,3 @@ pub extern "C" fn _start() -> ! {
 fn panic(info: &core::panic::PanicInfo) -> ! {
     test_panic_handler(info)
 }
-
-
-
-

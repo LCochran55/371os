@@ -6,8 +6,8 @@
 #![allow(static_mut_refs)]
 
 mod vga;
-use core::panic::PanicInfo;
 use binkle_os::serial_println;
+use core::panic::PanicInfo;
 
 #[unsafe(no_mangle)] // Doesnt mangle name of function
 pub extern "C" fn _start() -> ! {
@@ -15,13 +15,14 @@ pub extern "C" fn _start() -> ! {
 
     binkle_os::init();
 
-   // #[cfg(test)]
+    // #[cfg(test)]
     // test_main();
+
+    println!("Level 4 page table at: {:?}", x86_64::registers::control::Cr3::read().0.start_address());    
 
     println!("Binkle did not crash! What a good driver.");
     binkle_os::hlt_loop();
 }
-
 
 // Called on a panic
 #[cfg(not(test))]

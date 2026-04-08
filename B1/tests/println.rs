@@ -4,7 +4,7 @@
 #![test_runner(binkle_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
 
-use binkle_os::{println,print};
+use binkle_os::{print, println};
 
 #[panic_handler]
 fn test_panic(_info: &core::panic::PanicInfo) -> ! {
@@ -30,14 +30,9 @@ fn good() {
     assert!(true);
 }
 
-
 #[unsafe(no_mangle)]
 pub extern "C" fn _start() -> ! {
     test_main();
     binkle_os::exit_qemu(binkle_os::QEMU_FAIL);
     loop {}
 }
-
-
-
-
