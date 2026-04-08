@@ -29,6 +29,12 @@ pub fn exit_qemu(exit_code: u32) {
     }
 }
 
+pub fn hlt_loop() -> ! {
+    loop {
+        x86_64::instructions::hlt();
+    }
+}
+
 pub fn test_runner(tests: &[&dyn Fn()]) {
     serial_println!("Binkle now running {} tests", tests.len());
     for test in tests {
@@ -41,7 +47,7 @@ pub fn test_panic_handler(info: &core::panic::PanicInfo) -> ! {
     serial_println!("[Binkle Fail :-C]");
     serial_println!("Error: {}", info);
     exit_qemu(QEMU_FAIL);
-    loop {}
+    hlt_loop();
 }
 
 // Entry point for test
@@ -50,7 +56,7 @@ pub fn test_panic_handler(info: &core::panic::PanicInfo) -> ! {
 pub extern "C" fn _start() -> ! {
     init();
     test_main();
-    loop {}
+    hlt_loop();
 }
 
 #[cfg(test)]

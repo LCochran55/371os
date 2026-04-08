@@ -1,17 +1,33 @@
 #![no_std] // Doesnt link to standard library.
 #![no_main] // Disables all rust entry point.
+#![feature(abi_x86_interrupt)]
+#![cfg_attr(test, no_main)]
 #![feature(custom_test_frameworks)]
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
-#![feature(abi_x86_interrupt)]
-#![allow(static_mut_refs)]
+
+use x86_64::instructions::port::Port;
+use core::panic::PanicInfo;
 
 pub mod gdt;
-pub mod interrupts;
 pub mod serial;
+pub mod interrupts;
 pub mod vga;
 
-use core::panic::PanicInfo;
+pub const QEMU_PASS: u32 = 0x10 as u32;
+pub const QEMU_FAIL: u32 = 0x11 as u32;
+
+pub fn init() {
+    interrupts::init_idt();
+    gdt::init_gdt();
+}
+
+pub fn exit_qemu(exit_code: u32) {
+    unsafe {
+        let mut port = Port::new(0xf4);
+        port.write(exit_code);
+    }
+}
 
 pub fn hlt_loop() -> ! {
     loop {
@@ -19,35 +35,17 @@ pub fn hlt_loop() -> ! {
     }
 }
 
-pub fn init() {
-    interrupts::init_idt();
-    gdt::init_gdt();
-    //unsafe{interrupts::PICS.initialize()};
-    //x86_64::instructions::interrupts::enable();
-}
-
-pub const QEMU_PASS: u32 = 0x10u32;
-pub const QEMU_FAIL: u32 = 0x11u32;
-
-pub fn exit_qemu(exit_code: u32) {
-    use x86_64::instructions::port::Port;
-    unsafe {
-        let mut port = Port::new(0xf4);
-        port.write(exit_code);
-    }
-}
-
 pub fn test_runner(tests: &[&dyn Fn()]) {
-    serial_println!("Running {} tests", tests.len());
+    serial_println!("Binkle now running {} tests", tests.len());
     for test in tests {
         test();
     }
     exit_qemu(QEMU_PASS);
 }
 
-pub fn test_panic_handler(info: &PanicInfo) -> ! {
-    serial_println!("[Binkle fail!]\n");
-    serial_println!("Error: {}\n", info);
+pub fn test_panic_handler(info: &core::panic::PanicInfo) -> ! {
+    serial_println!("[Binkle Fail :-C]");
+    serial_println!("Error: {}", info);
     exit_qemu(QEMU_FAIL);
     hlt_loop();
 }
@@ -64,5 +62,9 @@ pub extern "C" fn _start() -> ! {
 #[cfg(test)]
 #[panic_handler]
 fn panic(info: &core::panic::PanicInfo) -> ! {
-    test_panic_handler(info);
+    test_panic_handler(info)
 }
+
+
+
+

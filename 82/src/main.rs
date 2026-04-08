@@ -3,6 +3,7 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(binkle_os::test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![allow(static_mut_refs)]
 
 mod vga;
 use core::panic::PanicInfo;
@@ -14,15 +15,11 @@ pub extern "C" fn _start() -> ! {
 
     binkle_os::init();
 
-    //unsafe {
-      //  *(0xdeadbeef as *mut u8) = 42;
-    //};
-
-    #[cfg(test)]
-    test_main();
+   // #[cfg(test)]
+    // test_main();
 
     println!("Binkle did not crash! What a good driver.");
-    loop {}
+    binkle_os::hlt_loop();
 }
 
 
@@ -31,7 +28,7 @@ pub extern "C" fn _start() -> ! {
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
     println!("{}", info);
-    loop {}
+    binkle_os::hlt_loop();
 }
 
 #[cfg(test)]

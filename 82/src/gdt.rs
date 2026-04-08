@@ -23,8 +23,6 @@ static TSS: Lazy<TaskStateSegment> = Lazy::new(|| {
         tss
 });
 
-
-
 // GDT (Global Distriptor Table) -> structure that contains the segments of the program
 // -> mostly used for: Switching between kernel space and user space, and loading a TSS structure.
 static GDT: Lazy<(GlobalDescriptorTable, SegmentSelector, SegmentSelector)> = Lazy::new(|| {

@@ -1,7 +1,4 @@
-#![no_std]
-use crate::println;
 use core::fmt;
-use lazy_static::lazy_static;
 
 static mut LATEST: usize = 0;
 const MMIO: *mut u8 = 0xb8000 as *mut u8;
@@ -19,17 +16,6 @@ fn char_to_vga(a: u8) {
 const ROWS: usize = 80;
 const COLS: usize = 25;
 const MAX: usize = ROWS * COLS;
-
-#[doc(hidden)]
-pub fn _print(args: core::fmt::Arguments) {
-    use core::fmt::Write;
-    use x86_64::instructions::interrupts;
-
-    interrupts::without_interrupts(|| {
-        println!("{}", args);
-        //WRITER.lock().write_fmt(args).unwrap();
-    });
-}
 
 fn scroll() {
     unsafe {
@@ -70,6 +56,12 @@ impl core::fmt::Write for Dummy {
         str_to_vga(s);
         Ok(())
     }
+}
+
+pub fn _print(args: core::fmt::Arguments) {
+    use core::fmt::Write;
+    let mut d = Dummy {};
+    write!(d, "{}", args);
 }
 
 #[macro_export]

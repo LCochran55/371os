@@ -1,4 +1,3 @@
-#![no_std]
 use core::fmt;
 use uart_16550::SerialPort;
 
@@ -19,12 +18,8 @@ macro_rules! serial_println {
         concat!($fmt, "\n"), $($arg)*));
 }
 
-#[doc(hidden)]
 pub fn _serial_print(args: fmt::Arguments) {
     use core::fmt::Write;
-    use x86_64::instructions::interrupts;
-
-    interrupts::without_interrupts(|| {
-        serial_println!("{}", args);
-    });
+    let mut serial_port = unsafe { SerialPort::new(0x3F8) };
+    serial_port.write_fmt(args).unwrap();
 }

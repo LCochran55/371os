@@ -1,5 +1,3 @@
-#![no_std]
-#![no_main]
 #![feature(custom_test_frameworks)]
 #![test_runner(binkle_os::test_runner)]
 
