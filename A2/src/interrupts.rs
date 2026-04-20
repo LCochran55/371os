@@ -1,5 +1,6 @@
 #![allow(static_mut_refs)]
 use crate::{gdt, hlt_loop, print, println};
+use crate::clock::{get_clock, CHARS, INDEX};
 use core::fmt;
 use pc_keyboard::{DecodedKey, HandleControl, Keyboard, ScancodeSet1, layouts};
 use pic8259::ChainedPics;
@@ -43,6 +44,7 @@ static IDT: Lazy<InterruptDescriptorTable> = Lazy::new(|| {
     }
     idt[InterruptIndex::Timer as usize].set_handler_fn(timer_interrupt_handler);
     idt[InterruptIndex::Keyboard as usize].set_handler_fn(keyboard_interrupt_handler);
+
     idt
 });
 
@@ -52,6 +54,7 @@ pub fn init_idt() {
         PICS.initialize();
         interrupts::enable();
     }
+
 }
 
 extern "x86-interrupt" fn breakpoint_handler(stack_frame: InterruptStackFrame) {
@@ -65,31 +68,61 @@ extern "x86-interrupt" fn double_fault_handler(
     panic!("EXCEPTION: DOUBLE FAULT\n{:#?}", stack_frame);
 }
 
-extern "x86-interrupt" fn timer_interrupt_handler(stack_frame: InterruptStackFrame) {
-    //print!(".");
-    //println!("INTERRUPT: TIMER\n{:#?}", stack_frame);
+const TICK_PER_SEC: usize = 17;
+static mut COUNT: f32 = 0.0;
+static mut COUNT_2: usize = 0;
 
-    unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8) };
+extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    unsafe { COUNT += 0.25; COUNT %= 4.50}; 
+    if unsafe {COUNT == 0.0} {
+        let clock = get_clock();
+        clock.tick();
+        //Allocate specific section of VGA buffer for clock
+        // MODIFY PRINT -> make it interact with text editor instead of VGA buffer
+        // VGA buffer of character
+        println!("{clock}");
+    }
+    unsafe {
+        PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8);
+    };
 }
 
 extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStackFrame) {
-    let mut keyboard: Keyboard<layouts::Us104Key, ScancodeSet1> = Keyboard::new(
-        ScancodeSet1::new(),
-        layouts::Us104Key,
-        HandleControl::Ignore,
-    );
+    use lazy_static::lazy_static;
+    use spin::Mutex;
 
+    lazy_static! {
+        static ref KEYBOARD: Mutex<Keyboard<layouts::Us104Key, ScancodeSet1>> =
+            Mutex::new(Keyboard::new(
+                ScancodeSet1::new(),
+                layouts::Us104Key,
+                HandleControl::Ignore
+            ));
+    }
+
+    let mut keyboard = KEYBOARD.lock();
     let scancode: u8 = unsafe { Port::new(0x60).read() };
+    
+    //Reads first 6 
+    //unsafe {
+    //if INDEX < 6 {
+      //  CHARS[index] = get_keyboard().get_char(scancode)
+    //}
+    //INDEX += 1;
+    //}
+
+    // Figures out which key is pressed
+    // Port read a byte from the keyboard’s data port.
+    // Byte is called the scancode and it represents
+    // the key press/release
     if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
         if let Some(key) = keyboard.process_keyevent(key_event) {
             match key {
                 DecodedKey::Unicode(character) => print!("{}", character),
-
-                DecodedKey::RawKey(_LShift) => print!("abc"),
+                DecodedKey::RawKey(key) => (), //println!("{:?}", key),
             }
         }
     }
-
     unsafe { PICS.notify_end_of_interrupt(InterruptIndex::Keyboard as u8) };
 }
 
@@ -97,14 +130,14 @@ extern "x86-interrupt" fn page_fault_handler(
     stack_frame: InterruptStackFrame,
     error_code: PageFaultErrorCode,
 ) {
-    //Error code provides
-    //info about the type of
-    //memory access that caused page fault
+    //Error code provides info about the type of memory access that caused page fault
     println!("EXCEPTION: PAGE FAULT");
-    println!("Accessed Address: {:?}", Cr2::read()); //Cr2 contains the accessed virtual address that 
-    //caused the page fault, read() reads and
-    //prints it
+    println!("Accessed Address: {:?}", Cr2::read());
+    //Cr2 contains the accessed virtual address that
+    //caused the page fault, read() reads and prints it
     println!("Error Code: {:?}", stack_frame);
     println!("{:#?}", error_code);
     hlt_loop();
 }
+
+

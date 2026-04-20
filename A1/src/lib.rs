@@ -5,6 +5,7 @@
 #![feature(custom_test_frameworks)]
 #![test_runner(test_runner)]
 #![reexport_test_harness_main = "test_main"]
+#![allow(static_mut_refs)]
 
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
