@@ -13,24 +13,34 @@ use core::panic::PanicInfo;
 use x86_64::VirtAddr;
 use x86_64::structures::paging::{Page, Translate};
 
+extern crate alloc;
+use alloc::boxed::Box;
+
 #[unsafe(no_mangle)] // Doesnt mangle name of function
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
     println!("Binkle World{}", "!");
 
     binkle_os::init();
 
-    let offset = VirtAddr::new(boot_info.physical_memory_offset);
-    let mut mapper = unsafe { memory::init(offset) };
-    let mut frame_allocator = unsafe { memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    //// ALLOC:
+    let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { binkle_os::memory::init(offset) };
+    let mut frame_allocator =
+        unsafe { binkle_os::memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    binkle_os::allocator::init_heap(&mut mapper, &mut frame_allocator).unwrap();
 
-    // map an unused page at address 0
-    let page = Page::containing_address(VirtAddr::new(0xdeadbeef000));
-    memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+    //let offset = VirtAddr::new(boot_info.physical_memory_offset);
+    //let mut mapper = unsafe { memory::init(offset) };
+    //let mut frame_allocator = unsafe { memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
 
-    // convert the page to a raw pointer and write a value
-    // this writes the string `New!` to the screen through the new mapping
-    let ptr: *mut u64 = page.start_address().as_mut_ptr();
-    unsafe { ptr.write_volatile(0x_f021_f077_f065_f04e) };
+    //// map an unused page at address 0
+    //let page = Page::containing_address(VirtAddr::new(0xdeadbeef000));
+    //memory::create_example_mapping(page, &mut mapper, &mut frame_allocator);
+
+    //// convert the page to a raw pointer and write a value
+    //// this writes the string `New!` to the screen through the new mapping
+    //let ptr: *mut u64 = page.start_address().as_mut_ptr();
+    // unsafe { ptr.write_volatile(0x_f021_f077_f065_f04e) };
 
     #[cfg(test)]
     test_main();

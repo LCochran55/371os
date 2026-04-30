@@ -1,9 +1,10 @@
-use x86_64::registers::control::Cr3;
 use bootloader::bootinfo::{MemoryMap, MemoryRegionType};
+use x86_64::registers::control::Cr3;
 use x86_64::{
     PhysAddr, VirtAddr,
     structures::paging::{
-        FrameAllocator, Mapper, OffsetPageTable, PageTable, PageTableFlags, Page, PhysFrame, Size4KiB,
+        FrameAllocator, Mapper, OffsetPageTable, Page, PageTable, PageTableFlags, PhysFrame,
+        Size4KiB,
     },
 };
 
@@ -17,13 +18,13 @@ pub unsafe fn init(offset: VirtAddr) -> OffsetPageTable<'static> {
 
 //Returns a mutable reference to the active level 4 table.
 pub unsafe fn active_level_4_table(offset: VirtAddr) -> &'static mut PageTable {
-        let (frame, _) = Cr3::read();
+    let (frame, _) = Cr3::read();
 
-        let phys = frame.start_address();
-        let virt = offset + phys.as_u64();
-        let ptr: *mut PageTable = virt.as_mut_ptr();
+    let phys = frame.start_address();
+    let virt = offset + phys.as_u64();
+    let ptr: *mut PageTable = virt.as_mut_ptr();
 
-        return unsafe{ &mut *ptr };
+    return unsafe { &mut *ptr };
 }
 
 //TRANSLATE_ADDR: Translate a virtual to a physical address.
@@ -56,13 +57,12 @@ pub unsafe fn translate_addr(addr: VirtAddr, offset: VirtAddr) -> Option<PhysAdd
 }
 // Create a FrameAllocator from the passed memory map.
 //
-//To create new page tables, need to create a frame allocator 
+//To create new page tables, need to create a frame allocator
 //we use the memory_map that is passed by the bootloader as part of the BootInfo struct
 pub struct BootInfoFrameAllocator {
     memory_map: &'static MemoryMap,
     next: usize,
 }
-
 
 /// Create a FrameAllocator from the passed memory map.
 impl BootInfoFrameAllocator {
@@ -90,7 +90,6 @@ impl BootInfoFrameAllocator {
         // create `PhysFrame` types from the start addresses
         frame_addresses.map(|addr| PhysFrame::containing_address(PhysAddr::new(addr)))
     }
-
 }
 
 unsafe impl FrameAllocator<Size4KiB> for BootInfoFrameAllocator {
@@ -113,9 +112,9 @@ pub fn create_example_mapping(
     let frame = PhysFrame::containing_address(PhysAddr::new(0xb8000));
     let flags = PageTableFlags::PRESENT | PageTableFlags::WRITABLE;
 
-    let map_to_result = unsafe { 
-    //NOT SAFE, ONLY FOR TESTING 
-    mapper.map_to(page, frame, flags, frame_allocator) 
+    let map_to_result = unsafe {
+        //NOT SAFE, ONLY FOR TESTING
+        mapper.map_to(page, frame, flags, frame_allocator)
     };
     map_to_result.expect("map_to failed").flush();
 }
@@ -131,5 +130,3 @@ unsafe impl FrameAllocator<Size4KiB> for EmptyFrameAllocator {
         None
     }
 }
-
-
