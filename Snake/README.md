@@ -1,0 +1,6 @@
+- [ ] To specify we want our device to run on our custom os we must:
+- [ ] Ensure qemu is installed
+- [ ] Provide it with a specified kernal, like main, ex: qemu-system-riscv64 -kernel main
+- [ ] Remove bios
+- [ ] Provide qemu with a machine to pretend to be, like sifive_u
+- [ ] Run like this: qemu-system-riscv64 -machine sifive_u -bios none -kernel main
