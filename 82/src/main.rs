@@ -15,6 +15,8 @@ pub extern "C" fn _start() -> ! {
 
     binkle_os::init();
 
+    serial_println!("YAY");
+
    // #[cfg(test)]
     // test_main();
 

@@ -19,6 +19,8 @@ use alloc::boxed::Box;
 #[unsafe(no_mangle)] // Doesnt mangle name of function
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
     //println!("Binkle World{}", "!");
+    //
+    serial_println!("Please enter 6 numbers to generate a seed.");
 
     binkle_os::init();
 

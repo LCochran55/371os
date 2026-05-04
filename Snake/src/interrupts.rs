@@ -1,6 +1,6 @@
 #![allow(static_mut_refs)]
 
-use crate::{gdt, hlt_loop, print, println};
+use crate::{gdt, hlt_loop, print, println, serial_print};
 use core::fmt;
 use pc_keyboard::{DecodedKey, HandleControl, KeyState, Keyboard, ScancodeSet1, layouts};
 use pic8259::ChainedPics;
@@ -71,6 +71,7 @@ extern "x86-interrupt" fn double_fault_handler(
 static mut DIRECTION: char = 'w';
 
 extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+
     if unsafe { INDEX } == 6 {
         unsafe {
             if SNAKE_ON == false {

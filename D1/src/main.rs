@@ -20,6 +20,8 @@ use alloc::boxed::Box;
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
     println!("Binkle World{}", "!");
 
+    serial_println!("YAY!");
+
     binkle_os::init();
 
     //// ALLOC:

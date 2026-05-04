@@ -17,6 +17,8 @@ use x86_64::structures::paging::{Page, Translate};
 pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
     println!("Binkle World{}", "!");
 
+    serial_println!("YAY!");
+
     binkle_os::init();
 
     let offset = VirtAddr::new(boot_info.physical_memory_offset);

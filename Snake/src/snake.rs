@@ -1,4 +1,5 @@
 use crate::print_snake;
+use crate::println;
 use crate::vga::snake_to_vga;
 use alloc::collections::VecDeque;
 
@@ -15,18 +16,15 @@ pub static mut SNAKE_ON: bool = false;
 pub static mut FOOD: (u32, u32) = (0, 0);
 pub static mut C_COUNT: u32 = 0;
 
-static SNAKE: Lazy<Snake> = Lazy::new(|| {
-    let mut snake = Snake {
-        body: VecDeque::with_capacity(25 * 80),
-        head: (0, 0),
-    };
-    snake
-});
+static mut SNAKE: Snake = Snake {
+    body: VecDeque::new(),
+    head: (0, 0),
+};
 
 pub fn init_snake() {
     unsafe {
-        let mut snake = SNAKE;
-        snake.body.push_front((0, 0));
+        SNAKE.body.reserve_exact(25 * 80);
+        SNAKE.body.push_front((0, 0));
     }
 }
 
@@ -36,15 +34,15 @@ pub fn get_snake() -> &'static mut Snake {
 
 pub fn random_pos(c: u32) -> (u32, u32) {
     //VGA = 720x40 0r 80x25
-    let a1: u32 = 22695477;
-    let m1: u32 = 2u32.pow(31);
+    let a1: u64 = 22695477;
+    let m1: u64 = 2u64.pow(31);
 
-    let a2: u32 = 1103515245;
-    let m2: u32 = 2u32.pow(31);
+    let a2: u64 = 1103515245;
+    let m2: u64 = 2u64.pow(31);
 
     unsafe {
-        let seed1 = (a1 * SEED + c) % m1;
-        let seed2 = (a2 * SEED + c) % m2;
+        let seed1 = (a1 * SEED as u64 + c as u64) % m1;
+        let seed2 = (a2 * SEED as u64 + c as u64) % m2;
 
         let random1 = ((seed1 / m1) * (2000 - 0 + 1) + 0) as u32;
         let random2 = ((seed2 / m2) * (2000 - 0 + 1) + 0) as u32;
@@ -59,19 +57,8 @@ pub struct Snake {
 }
 
 impl Snake {
-    pub fn new(initial_head: (u32, u32)) -> Self {
-        let mut body = VecDeque::new();
-        body.push_front(initial_head);
-
-        SNAKE = Snake {
-            body,
-            head: initial_head,
-        };
-    }
-
     pub fn update_position(&mut self, direction: char) {
         let (mut head_r, mut head_c) = self.body[0];
-
         let mut new_head = (0, 0);
 
         //Gets the direction which the head of the snake should update in

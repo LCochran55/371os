@@ -1,5 +1,5 @@
 #[global_allocator]
-static ALLOCATOR: Dummy = Dummy;
+static ALLOCATOR: linked_list_allocator::LockedHeap = linked_list_allocator::LockedHeap::empty();
 
 use alloc::alloc::{GlobalAlloc, Layout};
 use core::ptr::null_mut;
@@ -38,6 +38,11 @@ pub fn init_heap(
                 _ => return None,
             };
         }
+    }
+
+
+    unsafe {
+        ALLOCATOR.lock().init(HEAP_START, HEAP_SIZE);
     }
 
     return Some(());
