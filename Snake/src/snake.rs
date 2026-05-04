@@ -12,19 +12,21 @@ const WIDTH: u32 = 80;
 pub static mut SEED: u32 = 0;
 pub static mut INDEX: usize = 0;
 pub static mut SNAKE_ON: bool = false;
-
 pub static mut FOOD: (u32, u32) = (0, 0);
-
 pub static mut C_COUNT: u32 = 0;
 
-static mut SNAKE: Snake = Snake {
-    body: VecDeque::new(),
-    head: (0, 0),
-};
+static SNAKE: Lazy<Snake> = Lazy::new(|| {
+    let mut snake = Snake {
+        body: VecDeque::with_capacity(25 * 80),
+        head: (0, 0),
+    };
+    snake
+});
 
 pub fn init_snake() {
     unsafe {
-        SNAKE.body.push_front((0, 0));
+        let mut snake = SNAKE;
+        snake.body.push_front((0, 0));
     }
 }
 
@@ -52,7 +54,7 @@ pub fn random_pos(c: u32) -> (u32, u32) {
 }
 
 pub struct Snake {
-    body: VecDeque<(u32,u32)>,
+    body: VecDeque<(u32, u32)>,
     head: (u32, u32),
 }
 
@@ -60,10 +62,11 @@ impl Snake {
     pub fn new(initial_head: (u32, u32)) -> Self {
         let mut body = VecDeque::new();
         body.push_front(initial_head);
-        Snake {
+
+        SNAKE = Snake {
             body,
             head: initial_head,
-        }
+        };
     }
 
     pub fn update_position(&mut self, direction: char) {

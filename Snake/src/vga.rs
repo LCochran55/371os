@@ -57,7 +57,6 @@ pub fn str_to_vga(s: &str) {
 
 pub fn snake_to_vga(x: u32, y: u32) {
     unsafe {
-
         let mut color = (0x2 << 4 | 0xF);
         let offset = y as usize * 80 + x as usize * 2;
         unsafe { MMIO.offset(offset as isize).write(0x0000 | color) };
