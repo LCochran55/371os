@@ -3,7 +3,7 @@ use crate::vga::snake_to_vga;
 use alloc::vec;
 use alloc::vec::Vec;
 
-use crate::{exit_qemu, QEMU_FAIL};
+use crate::{QEMU_FAIL, exit_qemu};
 
 const HEIGHT: u32 = 25;
 const WIDTH: u32 = 80;
@@ -21,13 +21,11 @@ static mut SNAKE: Snake = Snake {
     head: (0, 0),
 };
 
-
 pub fn init_snake() {
     unsafe {
-        SNAKE.body.push((0,0));
+        SNAKE.body.push((0, 0));
     }
 }
-
 
 pub fn get_snake() -> &'static mut Snake {
     unsafe { &mut SNAKE }
@@ -113,7 +111,7 @@ impl Snake {
 
         //for &item in self.body.iter() {
         //      if item == new_head {
-        //    binkle_os::exit_qemu();
+        //    exit_qemu(QEMU_FAIL);
         //   }
 
         return false;
