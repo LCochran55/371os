@@ -7,7 +7,6 @@ use spin::lazy::Lazy;
 static mut LATEST: usize = 0;
 static mut CLOCK_LATEST: usize = 70;
 const MMIO: *mut u8 = 0xb8000 as *mut u8;
-const VGA_BUFFER: *mut u8 = 0xb8000 as *mut u8;
 
 const COLOR: u8 = 0xF;
 
@@ -58,9 +57,10 @@ pub fn str_to_vga(s: &str) {
 
 pub fn snake_to_vga(x: u32, y: u32) {
     unsafe {
-        let offset = (y as usize * 80 + x as usize) * 2;
-        *(VGA_BUFFER.offset(offset as isize)) = 0x0000;
-        *(VGA_BUFFER.offset(offset as isize + 1)) = 0x2;
+
+        let mut color = (0x2 << 4 | 0xF);
+        let offset = y as usize * 80 + x as usize * 2;
+        unsafe { MMIO.offset(offset as isize).write(0x0000 | color) };
     }
 }
 

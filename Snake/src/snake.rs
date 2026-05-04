@@ -1,7 +1,8 @@
 use crate::print_snake;
 use crate::vga::snake_to_vga;
-use alloc::vec;
-use alloc::vec::Vec;
+use alloc::collections::VecDeque;
+
+use spin::lazy::Lazy;
 
 use crate::{QEMU_FAIL, exit_qemu};
 
@@ -17,13 +18,13 @@ pub static mut FOOD: (u32, u32) = (0, 0);
 pub static mut C_COUNT: u32 = 0;
 
 static mut SNAKE: Snake = Snake {
-    body: Vec::new(),
+    body: VecDeque::new(),
     head: (0, 0),
 };
 
 pub fn init_snake() {
     unsafe {
-        SNAKE.body.push((0, 0));
+        SNAKE.body.push_front((0, 0));
     }
 }
 
@@ -51,14 +52,14 @@ pub fn random_pos(c: u32) -> (u32, u32) {
 }
 
 pub struct Snake {
-    body: Vec<(u32, u32)>,
+    body: VecDeque<(u32,u32)>,
     head: (u32, u32),
 }
 
 impl Snake {
     pub fn new(initial_head: (u32, u32)) -> Self {
-        let mut body = Vec::new();
-        body.push(initial_head);
+        let mut body = VecDeque::new();
+        body.push_front(initial_head);
         Snake {
             body,
             head: initial_head,
@@ -93,8 +94,8 @@ impl Snake {
                 C_COUNT += 1;
             }
         } else {
-            self.body.insert(0, new_head);
-            self.body.pop();
+            self.body.push_front(new_head);
+            self.body.pop_back();
         }
 
         unsafe {
@@ -118,6 +119,6 @@ impl Snake {
     }
 
     pub fn get_longer(&mut self) {
-        unsafe { self.body.insert(0, FOOD) };
+        unsafe { self.body.push_front(FOOD) };
     }
 }
