@@ -82,7 +82,7 @@ extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFr
 
     unsafe {
         COUNT += 0.25;
-        COUNT %= 2.50;
+        COUNT %= 0.75;
     };
     if unsafe { COUNT == 0.0 } {
         unsafe { SNAKE.update_position(DIRECTION) };

@@ -22,6 +22,7 @@ pub fn init_snake() {
     unsafe {
         SNAKE.body.reserve_exact(25 * 80);
         SNAKE.body.push_front((17, 40));
+        //print!("    SNAKE BODY IN INIT_SNAKE: {:?}", SNAKE.body);
     }
 }
 
@@ -53,19 +54,20 @@ impl Snake {
         }
 
         //Check if the updated snake position will hit a wall or itself -> itself todo
-        if self.check_collision(new_head) == true {
-            exit_qemu(QEMU_FAIL);
-        }
+
+        self.check_collision(new_head);
 
         if unsafe { FOOD == new_head } {
             self.body.push_front(new_head);
+
             unsafe {
-                erase(FOOD.0, FOOD.1);
+                //erase(FOOD.0, FOOD.1);
                 update_apple();
             }
         } else {
             self.body.push_front(new_head);
             unsafe { ERASE = self.body.pop_back().expect("REASON") };
+            //print!("    SNAKE BODY IN ELSE: {:?}", self.body);
         }
 
         unsafe {
@@ -76,16 +78,28 @@ impl Snake {
                     snake_to_vga(coord.0, coord.1, 0x00);
                 }
             }
-
             erase(ERASE.0, ERASE.1);
         }
     }
 
-    pub fn check_collision(&mut self, head: (u32, u32)) -> bool {
-        if !(0 <= head.0 || head.0 < HEIGHT || 0 <= head.1 || head.1 < WIDTH) {
-            return true;
+    pub fn check_collision(&mut self, head: (u32, u32)) {
+        if (head.0 <= 0 || head.1 <= 0) {
+            print!("SNAKE DIED! SCORE: {:?}", self.body.len());
+            snake_to_vga(head.0, head.1, 0x00);
+            let first = self.body[0];
+            erase(first.0, first.1);
+            crate::hlt_loop();
+        } else if (head.0 >= HEIGHT || head.1 >= WIDTH) {
+            print!("SNAKE DIED! SCORE: {:?}", self.body.len());
+            let first = self.body[0];
+            snake_to_vga(first.0, first.1, 0x00);
+            crate::hlt_loop();
         }
-
-        return false;
+        else if (self.body.contains(&head)) {
+            print!("SNAKE DIED! SCORE: {:?}", self.body.len());
+            let first = self.body[0];
+            snake_to_vga(first.0, first.1, 0x00);
+            crate::hlt_loop();
+        }
     }
 }
