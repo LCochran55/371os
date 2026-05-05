@@ -25,11 +25,11 @@ pub extern "C" fn _start(boot_info: &'static BootInfo) -> ! {
     binkle_os::init();
 
     //// ALLOC:
-    //let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
-    //let mut mapper = unsafe { binkle_os::memory::init(offset) };
-    //let mut frame_allocator =
-    //  unsafe { binkle_os::memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
-    //binkle_os::allocator::init_heap(&mut mapper, &mut frame_allocator).unwrap();
+    let offset = x86_64::VirtAddr::new(boot_info.physical_memory_offset);
+    let mut mapper = unsafe { binkle_os::memory::init(offset) };
+    let mut frame_allocator =
+        unsafe { binkle_os::memory::BootInfoFrameAllocator::init(&boot_info.memory_map) };
+    binkle_os::allocator::init_heap(&mut mapper, &mut frame_allocator).unwrap();
 
     //let offset = VirtAddr::new(boot_info.physical_memory_offset);
     //let mut mapper = unsafe { memory::init(offset) };

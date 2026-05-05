@@ -8,6 +8,7 @@
 #![reexport_test_harness_main = "test_main"]
 #![allow(static_mut_refs)]
 
+use crate::memory::BootInfoFrameAllocator;
 use core::panic::PanicInfo;
 use x86_64::instructions::port::Port;
 

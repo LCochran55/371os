@@ -55,20 +55,39 @@ pub fn str_to_vga(s: &str) {
     }
 }
 
-pub fn snake_to_vga(x: u32, y: u32) {
+use crate::println;
+
+pub fn snake_to_vga(x: u32, y: u32, ch: u8) {
     unsafe {
         let mut color = (0x2 << 4 | 0xF);
-        let offset = y as usize * 80 + x as usize * 2;
-        unsafe { MMIO.offset(offset as isize).write(0x0000 | color) };
+        let offset = x as usize * 80 + y as usize * 2;
+        unsafe {
+            MMIO.offset(offset as isize).write(ch);
+            MMIO.offset(offset as isize + 1).write(color);
+        }
     }
 }
 
-#[macro_export]
-macro_rules! print_snake {
-    ($coord:expr) => {
-        let (x, y) = $coord;
-        snake_to_vga(*x, *y);
-    };
+pub fn food_to_vga(x: u32, y: u32) {
+    unsafe {
+        let mut color = (0x5 << 4 | 0xF);
+        let offset = x as usize * 80 + y as usize * 2;
+        unsafe {
+            MMIO.offset(offset as isize).write(0x09);
+            MMIO.offset(offset as isize + 1).write(color);
+        }
+    }
+}
+
+pub fn erase(x: u32, y: u32) {
+    unsafe {
+        let mut color = (0x00 << 4 | 0x00);
+        let offset = x as usize * 80 + y as usize * 2;
+        unsafe {
+            MMIO.offset(offset as isize).write(0x00);
+            MMIO.offset(offset as isize + 1).write(color);
+        }
+    }
 }
 
 pub struct Dummy {}

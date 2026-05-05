@@ -10,7 +10,7 @@ use x86_64::instructions::port::Port;
 use x86_64::registers::control::Cr2;
 use x86_64::structures::idt::{InterruptDescriptorTable, InterruptStackFrame, PageFaultErrorCode};
 
-use crate::snake::{C_COUNT, FOOD, INDEX, SEED, SNAKE_ON, get_snake, init_snake, random_pos};
+use crate::snake::{FOOD, SNAKE, SNAKE_ON, init_snake, update_apple};
 
 pub const PIC_1_OFFSET: u8 = 32;
 pub const PIC_2_OFFSET: u8 = PIC_1_OFFSET + 8;
@@ -70,20 +70,22 @@ extern "x86-interrupt" fn double_fault_handler(
 
 static mut DIRECTION: char = 'w';
 
-extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+static mut COUNT: f32 = 0.0;
 
-    if unsafe { INDEX } == 6 {
-        unsafe {
-            if SNAKE_ON == false {
-                FOOD = random_pos(C_COUNT);
-                C_COUNT += 1;
-                let snake = get_snake();
-                init_snake();
-                SNAKE_ON = true;
-            }
+extern "x86-interrupt" fn timer_interrupt_handler(_stack_frame: InterruptStackFrame) {
+    unsafe {
+        if SNAKE_ON == false {
+            init_snake();
+            SNAKE_ON = true;
         }
-        let snake = get_snake();
-        unsafe { snake.update_position(DIRECTION) };
+    }
+
+    unsafe {
+        COUNT += 0.25;
+        COUNT %= 2.50;
+    };
+    if unsafe { COUNT == 0.0 } {
+        unsafe { SNAKE.update_position(DIRECTION) };
     }
     unsafe {
         PICS.notify_end_of_interrupt(InterruptIndex::Timer as u8);
@@ -107,47 +109,18 @@ extern "x86-interrupt" fn keyboard_interrupt_handler(_stack_frame: InterruptStac
     let scancode: u8 = unsafe { Port::new(0x60).read() };
 
     unsafe {
-        if INDEX < 6 {
-            if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-                let state = key_event.state;
-                if let Some(key) = keyboard.process_keyevent(key_event) {
-                    match key {
-                        DecodedKey::Unicode(character) => match character {
-                            '0' => unsafe { SEED = SEED * 10 + 0 },
-                            '1' => unsafe { SEED = SEED * 10 + 1 },
-                            '2' => unsafe { SEED = SEED * 10 + 2 },
-                            '3' => unsafe { SEED = SEED * 10 + 3 },
-                            '4' => unsafe { SEED = SEED * 10 + 4 },
-                            '5' => unsafe { SEED = SEED * 10 + 5 },
-                            '6' => unsafe { SEED = SEED * 10 + 6 },
-                            '7' => unsafe { SEED = SEED * 10 + 7 },
-                            '8' => unsafe { SEED = SEED * 10 + 8 },
-                            '9' => unsafe { SEED = SEED * 10 + 9 },
-                            _ => (),
-                        },
-                        DecodedKey::RawKey(key) => (),
-                    }
-                }
-                if state == KeyState::Down {
-                    //println!("INDEX BEFORE {:?}", INDEX);
-                    INDEX += 1;
-                    //println!("INDEX AFTER {:?}", INDEX);
-                }
-            }
-        } else {
-            if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
-                let state = key_event.state;
-                if let Some(key) = keyboard.process_keyevent(key_event) {
-                    match key {
-                        DecodedKey::Unicode(character) => match character {
-                            'w' => unsafe { DIRECTION = 'w' },
-                            'a' => unsafe { DIRECTION = 'a' },
-                            's' => unsafe { DIRECTION = 's' },
-                            'd' => unsafe { DIRECTION = 'd' },
-                            _ => (),
-                        },
-                        DecodedKey::RawKey(key) => (),
-                    }
+        if let Ok(Some(key_event)) = keyboard.add_byte(scancode) {
+            let state = key_event.state;
+            if let Some(key) = keyboard.process_keyevent(key_event) {
+                match key {
+                    DecodedKey::Unicode(character) => match character {
+                        'w' => unsafe { DIRECTION = 'w' },
+                        'a' => unsafe { DIRECTION = 'a' },
+                        's' => unsafe { DIRECTION = 's' },
+                        'd' => unsafe { DIRECTION = 'd' },
+                        _ => (),
+                    },
+                    DecodedKey::RawKey(key) => (),
                 }
             }
         }
